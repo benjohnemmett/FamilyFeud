@@ -26,6 +26,15 @@ game_state = {
     'last_selected': None,
 }
 
+# Team info (displayed on play/judge pages)
+game_state.update({
+    'team1Name': 'Team 1',
+    'team2Name': 'Team 2',
+    'team1Score': 0,
+    'team2Score': 0,
+    'activeTeam': 1,
+})
+
 async def broadcast_state():
     # schedule emit to avoid awaiting in non-async contexts
     await sio.emit('state_update', game_state, namespace='/game')

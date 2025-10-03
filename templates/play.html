@@ -9,10 +9,26 @@
 </head>
 <body>
     <div class="container">
-    <div class="title">Family Feud</div>
+        <div class="header">
+            <div class="title">Family Feud</div>
+        </div>
+
+        <div class="teams-section">
+            <div class="team-box" id="team1Box">
+                <div class="team-name" id="team1Name">Team 1</div>
+                <div class="team-score" id="team1Score">0</div>
+                <div class="team-indicator">● PLAYING ●</div>
+            </div>
+            <div class="team-box" id="team2Box">
+                <div class="team-name" id="team2Name">Team 2</div>
+                <div class="team-score" id="team2Score">0</div>
+                <div class="team-indicator">● PLAYING ●</div>
+            </div>
+        </div>
+
         <div class="question">
-            <div id="questionText">Loading...</div>
-            <div id="questionCounter"></div>
+            <div class="question-text" id="questionText">Loading...</div>
+            <div class="question-counter" id="questionCounter"></div>
         </div>
 
         <div class="board" id="board">
@@ -21,10 +37,8 @@
     </div>
 
     <script>
-        const socket = io('/game');
-        socket.on('connect', () => console.log('play connected'));
-
-        function renderState(state) {
+        // page-level render function used by /static/app.js
+        window.renderState = function (state) {
             document.getElementById('questionText').textContent = state.question || '';
             const board = document.getElementById('board');
             board.innerHTML = '';
@@ -38,12 +52,8 @@
                 `;
                 board.appendChild(row);
             });
-        }
-
-        socket.on('state_update', state => renderState(state));
-
-        // fetch initial state in case socket missed it
-        fetch('/api/state').then(r => r.json()).then(renderState).catch(()=>{});
+        };
     </script>
+    <script src="/static/app.js"></script>
 </body>
 </html>
