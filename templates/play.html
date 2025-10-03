@@ -94,6 +94,41 @@
                     if (i <= strikes) el.classList.add('active'); else el.classList.remove('active');
                 }
         };
+        
+        // play buzzer sound and animate strikes when strikes increase
+        (function () {
+            let prevStrikes = 0;
+
+            function playBuzzer() {
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const o = ctx.createOscillator();
+                    const g = ctx.createGain();
+                    o.type = 'sawtooth';
+                    o.frequency.value = 160; // low buzzer
+                    o.connect(g);
+                    g.connect(ctx.destination);
+                    g.gain.setValueAtTime(0.3, ctx.currentTime);
+                    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+                    o.start();
+                    o.stop(ctx.currentTime + 0.4);
+                } catch (e) { console.warn('audio failed', e); }
+            }
+
+            window.onStateUpdate = function (state) {
+                const strikes = state.strikes || 0;
+                if (strikes > prevStrikes) {
+                    // play buzzer and shake
+                    playBuzzer();
+                    const strikesEl = document.querySelector('.strikes');
+                    if (strikesEl) {
+                        strikesEl.classList.add('shake');
+                        setTimeout(() => strikesEl.classList.remove('shake'), 600);
+                    }
+                }
+                prevStrikes = strikes;
+            };
+        })();
     </script>
     <script src="/static/app.js"></script>
 </body>

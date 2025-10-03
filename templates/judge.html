@@ -13,12 +13,12 @@
     </div>
 
     <div class="teams-section">
-      <div class="team-box" id="team1Box">
+      <div class="team-box" id="team1Box" role="button" tabindex="0" aria-pressed="false">
         <div class="team-name" id="team1Name">Team 1</div>
         <div class="team-score" id="team1Score">0</div>
         <div class="team-indicator">● PLAYING ●</div>
       </div>
-      <div class="team-box" id="team2Box">
+      <div class="team-box" id="team2Box" role="button" tabindex="0" aria-pressed="false">
         <div class="team-name" id="team2Name">Team 2</div>
         <div class="team-score" id="team2Score">0</div>
         <div class="team-indicator">● PLAYING ●</div>
@@ -28,6 +28,15 @@
     <div class="question">
       <div class="question-text" id="question">Loading...</div>
       <div class="question-counter" id="questionCounter"></div>
+    </div>
+    <div class="strikes" style="align-items:center;">
+      <div class="strike" id="strike1">X</div>
+      <div class="strike" id="strike2">X</div>
+      <div class="strike" id="strike3">X</div>
+      <div style="display:flex;gap:8px;margin-left:16px;align-items:center;">
+        <button id="addStrikeBtn" class="btn-danger" style="height:48px;">Add Strike</button>
+        <button id="clearStrikesBtn" class="btn-primary" style="height:48px;">Clear Strikes</button>
+      </div>
     </div>
     <div id="answers"></div>
     <button id="reset">Reset</button>
@@ -45,6 +54,26 @@
           div.onclick = () => selectAnswer(a.id);
           container.appendChild(div);
         });
+        // reflect active team in the judge UI
+        const t1 = document.getElementById('team1PlayBtn');
+        const t2 = document.getElementById('team2PlayBtn');
+        const box1 = document.getElementById('team1Box');
+        const box2 = document.getElementById('team2Box');
+        if (t1 && t2) {
+          if ((state.activeTeam || 1) === 1) { t1.classList.add('active'); t2.classList.remove('active'); }
+          else { t2.classList.add('active'); t1.classList.remove('active'); }
+        }
+        if (box1 && box2) {
+          if ((state.activeTeam || 1) === 1) { box1.classList.add('active'); box2.classList.remove('active'); box1.setAttribute('aria-pressed', 'true'); box2.setAttribute('aria-pressed', 'false'); }
+          else { box2.classList.add('active'); box1.classList.remove('active'); box2.setAttribute('aria-pressed', 'true'); box1.setAttribute('aria-pressed', 'false'); }
+        }
+        // update strikes display (judge view)
+        const strikes = state.strikes || 0;
+        for (let i = 1; i <= 3; i++) {
+          const el = document.getElementById(`strike${i}`);
+          if (!el) continue;
+          if (i <= strikes) el.classList.add('active'); else el.classList.remove('active');
+        }
       };
 
       async function selectAnswer(id) {
@@ -59,6 +88,26 @@
       document.getElementById('reset').onclick = async () => {
         await fetch('/api/reset', { method: 'POST' });
       };
+      // make the team boxes clickable in judge view
+      const teamBox1 = document.getElementById('team1Box');
+      const teamBox2 = document.getElementById('team2Box');
+      if (teamBox1) {
+        teamBox1.addEventListener('click', async () => { await fetch('/api/active', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ team: 1 }) }); });
+        teamBox1.addEventListener('keydown', async (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); await fetch('/api/active', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ team: 1 }) }); } });
+      }
+      if (teamBox2) {
+        teamBox2.addEventListener('click', async () => { await fetch('/api/active', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ team: 2 }) }); });
+        teamBox2.addEventListener('keydown', async (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); await fetch('/api/active', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ team: 2 }) }); } });
+      }
+      // add strike button
+      const addStrikeBtn = document.getElementById('addStrikeBtn');
+      if (addStrikeBtn) {
+        addStrikeBtn.addEventListener('click', async () => { await fetch('/api/strike', { method: 'POST' }); });
+      }
+      const clearStrikesBtn = document.getElementById('clearStrikesBtn');
+      if (clearStrikesBtn) {
+        clearStrikesBtn.addEventListener('click', async () => { await fetch('/api/clear_strikes', { method: 'POST' }); });
+      }
     </script>
     <script src="/static/app.js"></script>
   </body>

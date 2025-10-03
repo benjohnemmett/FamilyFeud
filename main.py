@@ -24,6 +24,7 @@ game_state = {
         {'id': 5, 'text': 'Clothes', 'points': 10, 'revealed': False},
     ],
     'last_selected': None,
+    'strikes': 0,
 }
 
 # Team info (displayed on play/judge pages)
@@ -76,6 +77,33 @@ async def api_reset():
     game_state['last_selected'] = None
     await broadcast_state()
     return {'ok': True}
+
+
+@app.post('/api/active')
+async def api_set_active(payload: dict):
+    team = payload.get('team')
+    if team not in (1, 2):
+        return JSONResponse({'error': 'team must be 1 or 2'}, status_code=status.HTTP_400_BAD_REQUEST)
+    game_state['activeTeam'] = team
+    await broadcast_state()
+    return {'ok': True, 'active': team}
+
+
+@app.post('/api/strike')
+async def api_add_strike():
+    # increment strikes up to 3
+    current = game_state.get('strikes', 0)
+    if current < 3:
+        game_state['strikes'] = current + 1
+        await broadcast_state()
+    return {'ok': True, 'strikes': game_state.get('strikes', 0)}
+
+
+@app.post('/api/clear_strikes')
+async def api_clear_strikes():
+    game_state['strikes'] = 0
+    await broadcast_state()
+    return {'ok': True, 'strikes': 0}
 
 
 @sio.event(namespace='/game')

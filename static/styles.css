@@ -95,6 +95,12 @@ body {
   transition: all 0.25s ease;
 }
 
+/* clickable team-box visual affordance (judge view) */
+.team-box[role="button"] { cursor: pointer; }
+.team-box[role="button"]:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 12px 30px rgba(0,0,0,0.4); }
+.team-box[role="button"]:focus { outline: 2px solid var(--gold); outline-offset: 4px; }
+.team-box[role="button"].active { border-color: var(--gold); background: rgba(255,215,0,0.14); }
+
 .team-box.active {
   border-color: var(--gold);
   background: rgba(255,215,0,0.12);
