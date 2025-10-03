@@ -31,6 +31,17 @@
             <div class="question-counter" id="questionCounter"></div>
         </div>
 
+        <div class="round-score-box">
+            <div class="round-score-label">ROUND SCORE</div>
+            <div class="round-score-value" id="roundScore">0</div>
+        </div>
+
+        <div class="strikes">
+            <div class="strike" id="strike1">X</div>
+            <div class="strike" id="strike2">X</div>
+            <div class="strike" id="strike3">X</div>
+        </div>
+
         <div class="board" id="board">
             <!-- Answers injected here -->
         </div>
@@ -39,19 +50,49 @@
     <script>
         // page-level render function used by /static/app.js
         window.renderState = function (state) {
-            document.getElementById('questionText').textContent = state.question || '';
-            const board = document.getElementById('board');
-            board.innerHTML = '';
-            (state.answers || []).forEach((a, idx) => {
-                const row = document.createElement('div');
-                row.className = 'answer-row ' + (a.revealed ? 'revealed' : 'hidden-answer');
-                row.innerHTML = `
-                    <div class="answer-number">${idx + 1}</div>
-                    <div class="answer-text">${a.revealed ? a.text.toUpperCase() : '——'}</div>
-                    <div class="answer-points">${a.revealed ? a.points : ''}</div>
-                `;
-                board.appendChild(row);
-            });
+                document.getElementById('questionText').textContent = state.question || '';
+                // update question counter (revealed / total)
+                const revealedCount = (state.answers || []).filter(a => a.revealed).length;
+                const totalCount = (state.answers || []).length;
+                const counterEl = document.getElementById('questionCounter');
+                if (counterEl) counterEl.textContent = `${revealedCount} / ${totalCount}`;
+
+                // update round score
+                const roundEl = document.getElementById('roundScore');
+                if (roundEl) roundEl.textContent = (state.roundScore ?? 0);
+
+                const board = document.getElementById('board');
+                board.innerHTML = '';
+                // create two column layout: left gets first half, right gets the rest
+                const leftCol = document.createElement('div');
+                leftCol.className = 'column';
+                const rightCol = document.createElement('div');
+                rightCol.className = 'column';
+
+                const answers = state.answers || [];
+                const total = answers.length;
+                const half = Math.ceil(total / 2);
+
+                answers.forEach((a, idx) => {
+                    const row = document.createElement('div');
+                    row.className = 'answer-row ' + (a.revealed ? 'revealed' : 'hidden-answer');
+                    row.innerHTML = `
+                        <div class="answer-number">${idx + 1}</div>
+                        <div class="answer-text">${a.revealed ? a.text.toUpperCase() : '——'}</div>
+                        <div class="answer-points">${a.revealed ? a.points : ''}</div>
+                    `;
+                    if (idx < half) leftCol.appendChild(row); else rightCol.appendChild(row);
+                });
+
+                board.appendChild(leftCol);
+                board.appendChild(rightCol);
+                // update strikes display
+                const strikes = state.strikes || 0;
+                for (let i = 1; i <= 3; i++) {
+                    const el = document.getElementById(`strike${i}`);
+                    if (!el) continue;
+                    if (i <= strikes) el.classList.add('active'); else el.classList.remove('active');
+                }
         };
     </script>
     <script src="/static/app.js"></script>
