@@ -153,22 +153,8 @@
       if (btnSetTeam2) btnSetTeam2.addEventListener('click', async () => { await fetch('/api/active', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ team: 2 }) }); });
 
       if (btnSteal) btnSteal.addEventListener('click', async () => {
-        // Try server-side steal endpoint first. If it doesn't exist, fallback to switching active team and clearing strikes.
-        try {
-          const res = await fetch('/api/steal', { method: 'POST' });
-          if (res.ok) return;
-        } catch (e) { /* fallthrough to fallback */ }
-        // fallback: set the opposite team active and clear strikes
-        // fetch current state to determine active
-        try {
-          const s = await fetch('/api/state');
-          if (!s.ok) return;
-          const state = await s.json();
-          const active = state.activeTeam || 1;
-          const other = active === 1 ? 2 : 1;
-          await fetch('/api/active', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ team: other }) });
-          await fetch('/api/clear_strikes', { method: 'POST' });
-        } catch (e) { console.error('Steal fallback failed', e); }
+        const res = await fetch('/api/award_steal', { method: 'POST' });
+        if (!res.ok) alert('Award steal failed');
       });
 
       if (btnRevealAll) btnRevealAll.addEventListener('click', async () => {
@@ -192,13 +178,8 @@
       });
 
       if (btnAwardPoints) btnAwardPoints.addEventListener('click', async () => {
-        const pts = prompt('Enter points to award to the active team:');
-        if (!pts) return;
-        const n = Number(pts);
-        if (Number.isNaN(n)) return alert('Please enter a number');
-        // attempt to call /api/award (server may not have this endpoint yet)
-        const res = await fetch('/api/award', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ points: n }) });
-        if (!res.ok) alert('Award failed (server may not implement /api/award)');
+        const res = await fetch('/api/award', { method: 'POST' });
+        if (!res.ok) alert('Award failed');
       });
     </script>
     <script src="/static/app.js"></script>

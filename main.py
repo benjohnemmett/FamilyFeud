@@ -81,6 +81,8 @@ async def api_reset():
     for a in game_state['answers']:
         a['revealed'] = False
     game_state['last_selected'] = None
+    # reset round score on next round
+    game_state['roundScore'] = 0
     await broadcast_state()
     return {'ok': True}
 
@@ -93,6 +95,37 @@ async def api_set_active(payload: dict):
     game_state['activeTeam'] = team
     await broadcast_state()
     return {'ok': True, 'active': team}
+
+
+@app.post('/api/award')
+async def api_award():
+    # award roundScore to active team and reset roundScore
+    pts = game_state.get('roundScore', 0)
+    if pts <= 0:
+        return {'ok': True, 'awarded': 0}
+    if game_state.get('activeTeam', 1) == 1:
+        game_state['team1Score'] = game_state.get('team1Score', 0) + pts
+    else:
+        game_state['team2Score'] = game_state.get('team2Score', 0) + pts
+    game_state['roundScore'] = 0
+    await broadcast_state()
+    return {'ok': True, 'awarded': pts}
+
+
+@app.post('/api/award_steal')
+async def api_award_steal():
+    # award roundScore to the non-active team (steal) and reset roundScore
+    pts = game_state.get('roundScore', 0)
+    if pts <= 0:
+        return {'ok': True, 'awarded': 0}
+    other = 2 if game_state.get('activeTeam', 1) == 1 else 1
+    if other == 1:
+        game_state['team1Score'] = game_state.get('team1Score', 0) + pts
+    else:
+        game_state['team2Score'] = game_state.get('team2Score', 0) + pts
+    game_state['roundScore'] = 0
+    await broadcast_state()
+    return {'ok': True, 'awarded': pts, 'to': other}
 
 
 @app.post('/api/strike')
