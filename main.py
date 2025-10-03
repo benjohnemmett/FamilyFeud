@@ -1,5 +1,6 @@
 import asyncio
 from fastapi import FastAPI, Request, status
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 import socketio
@@ -8,6 +9,9 @@ import socketio
 sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins='*')
 app = FastAPI()
 templates = Jinja2Templates(directory='templates')
+
+# Serve static files (CSS/JS/assets)
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # In-memory game state
 game_state = {

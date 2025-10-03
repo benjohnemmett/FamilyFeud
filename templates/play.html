@@ -1,35 +1,49 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Family Feud - Play</title>
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js" integrity="" crossorigin="anonymous"></script>
-    <style>
-      body { font-family: Arial, sans-serif; padding: 20px }
-      .answer { padding: 8px; border: 1px solid #ccc; margin: 6px 0 }
-      .hidden { color: #bbb }
-    </style>
-  </head>
-  <body>
-    <h1>Family Feud - Play</h1>
-    <h2 id="question">Loading...</h2>
-    <div id="answers"></div>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+    <div class="title">Family Feud</div>
+        <div class="question">
+            <div id="questionText">Loading...</div>
+            <div id="questionCounter"></div>
+        </div>
+
+        <div class="board" id="board">
+            <!-- Answers injected here -->
+        </div>
+    </div>
 
     <script>
-      const socket = io('/game');
-      socket.on('connect', () => console.log('connected'));
-      socket.on('state_update', state => {
-        document.getElementById('question').innerText = state.question;
-        const container = document.getElementById('answers');
-        container.innerHTML = '';
-        state.answers.forEach(a => {
-          const div = document.createElement('div');
-          div.className = 'answer';
-          div.innerText = a.revealed ? `${a.text} — ${a.points}` : '——';
-          if (!a.revealed) div.classList.add('hidden');
-          container.appendChild(div);
-        });
-      });
+        const socket = io('/game');
+        socket.on('connect', () => console.log('play connected'));
+
+        function renderState(state) {
+            document.getElementById('questionText').textContent = state.question || '';
+            const board = document.getElementById('board');
+            board.innerHTML = '';
+            (state.answers || []).forEach((a, idx) => {
+                const row = document.createElement('div');
+                row.className = 'answer-row ' + (a.revealed ? 'revealed' : 'hidden-answer');
+                row.innerHTML = `
+                    <div class="answer-number">${idx + 1}</div>
+                    <div class="answer-text">${a.revealed ? a.text.toUpperCase() : '——'}</div>
+                    <div class="answer-points">${a.revealed ? a.points : ''}</div>
+                `;
+                board.appendChild(row);
+            });
+        }
+
+        socket.on('state_update', state => renderState(state));
+
+        // fetch initial state in case socket missed it
+        fetch('/api/state').then(r => r.json()).then(renderState).catch(()=>{});
     </script>
-  </body>
-  </html>
+</body>
+</html>
