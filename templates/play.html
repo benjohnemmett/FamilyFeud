@@ -79,7 +79,7 @@
                     row.innerHTML = `
                         <div class="answer-number">${idx + 1}</div>
                         <div class="answer-text">${a.revealed ? a.text.toUpperCase() : '——'}</div>
-                        <div class="answer-points">${a.revealed ? a.points : ''}</div>
+                        <div class="answer-points">${a.revealed ? a.points + ' pts' : ''}</div>
                     `;
                     if (idx < half) leftCol.appendChild(row); else rightCol.appendChild(row);
                 });

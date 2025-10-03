@@ -29,6 +29,10 @@
       <div class="question-text" id="question">Loading...</div>
       <div class="question-counter" id="questionCounter"></div>
     </div>
+    <div class="round-score-box">
+      <div class="round-score-label">ROUND SCORE</div>
+      <div class="round-score-value" id="roundScore">0</div>
+    </div>
     <div class="strikes">
       <div class="strike" id="strike1">X</div>
       <div class="strike" id="strike2">X</div>
@@ -45,19 +49,19 @@
       <div class="control-panel" id="teamControls">
         <div class="control-title">Team Controls</div>
         <div class="controls">
-          <button class="btn-primary control-btn" id="btnSetTeam1">Set Team 1 Playing</button>
-          <button class="btn-primary control-btn" id="btnSetTeam2">Set Team 2 Playing</button>
-          <button class="btn-secondary control-btn" id="btnAwardPoints">Award Points…</button>
-          <button class="btn-warning control-btn" id="btnSteal">Steal</button>
+          <!-- <button class="btn-primary control-btn" id="btnSetTeam1">Set Team 1 Playing</button>
+          <button class="btn-primary control-btn" id="btnSetTeam2">Set Team 2 Playing</button> -->
+          <button class="btn-secondary control-btn" id="btnAwardPoints">Award Points</button>
+          <button class="btn-warning control-btn" id="btnSteal">Award Steal</button>
         </div>
       </div>
 
       <div class="control-panel" id="gameControls">
         <div class="control-title">Game Controls</div>
         <div class="controls">
-          <button class="btn-primary control-btn" id="btnRevealAll">Reveal All</button>
-          <button class="btn-danger control-btn" id="btnClearStrikesBottom">Clear Strikes</button>
-          <button class="btn-secondary control-btn" id="btnNextRound">Next Round</button>
+          <button class="btn-secondary control-btn" id="btnRevealAll">Reveal All</button>
+          <!-- <button class="btn-danger control-btn" id="btnClearStrikesBottom">Clear Strikes</button> -->
+          <button class="btn-warning control-btn" id="btnNextRound">Next Round</button>
         </div>
       </div>
     </div>
@@ -66,6 +70,14 @@
       // page-level render function used by /static/app.js
       window.renderState = function (state) {
         document.getElementById('question').innerText = state.question || '';
+          // update question counter (revealed / total)
+          const revealedCount = (state.answers || []).filter(a => a.revealed).length;
+          const totalCount = (state.answers || []).length;
+          const counterEl = document.getElementById('questionCounter');
+          if (counterEl) counterEl.textContent = `${revealedCount} / ${totalCount}`;
+          // update round score
+          const roundEl = document.getElementById('roundScore');
+          if (roundEl) roundEl.textContent = (state.roundScore ?? 0);
         const container = document.getElementById('answers');
         container.innerHTML = '';
         (state.answers || []).forEach(a => {

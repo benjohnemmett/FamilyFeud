@@ -25,6 +25,7 @@ game_state = {
     ],
     'last_selected': None,
     'strikes': 0,
+    'roundScore': 0,
 }
 
 # Team info (displayed on play/judge pages)
@@ -63,10 +64,15 @@ async def api_select(payload: dict):
         return JSONResponse({'error': 'id required'}, status_code=status.HTTP_400_BAD_REQUEST)
     for a in game_state['answers']:
         if a['id'] == answer_id:
-            a['revealed'] = True
-            game_state['last_selected'] = a
-            await broadcast_state()
-            return {'ok': True, 'selected': a}
+            if not a.get('revealed'):
+                a['revealed'] = True
+                # add points to round score
+                game_state['roundScore'] = game_state.get('roundScore', 0) + a.get('points', 0)
+                game_state['last_selected'] = a
+                await broadcast_state()
+                return {'ok': True, 'selected': a, 'roundScore': game_state['roundScore']}
+            else:
+                return {'ok': True, 'selected': a, 'roundScore': game_state.get('roundScore', 0)}
     return JSONResponse({'error': 'not found'}, status_code=status.HTTP_404_NOT_FOUND)
 
 

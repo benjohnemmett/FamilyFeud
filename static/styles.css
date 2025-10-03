@@ -177,11 +177,11 @@ body {
 }
 
 .answer-points {
-  width: 80px;
+  width: 100px;
   text-align: right;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   color: var(--gold);
-  font-weight: 700;
+  font-weight: 900;
 }
 
 .hidden-answer .answer-text,
