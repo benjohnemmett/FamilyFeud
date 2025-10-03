@@ -1,0 +1,7 @@
+fastapi>=0.95
+python-socketio[asgi]>=5.8
+uvicorn>=0.22
+pytest
+pytest-asyncio
+httpx>=0.24
+pytest
