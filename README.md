@@ -1,44 +1,50 @@
-# Family Feud Flask App
+# Family Feud — FastAPI + Socket.IO
 
-Simple Flask app that serves two pages:
+This repository is a small real-time Family Feud style app.
+It serves two main pages:
 
-- `/` - Player/audience view (shows question and revealed answers)
-- `/judge` - Judge view (shows all answers; clicking an answer selects/reveals it)
+- `/` — Player / audience view (show question, revealed answers, round score, strikes)
+- `/judge` — Judge view (controls to reveal answers, add strikes, award points, control active team)
 
-Server pushes updates via Socket.IO (namespace `/game`).
+Realtime updates use python-socketio (ASGI) with the Socket.IO browser client on the frontend. The server is implemented with FastAPI and an embedded Socket.IO ASGI app.
 
-Quick start:
+Requirements
+- Python 3.10+
+- Install packages in `requirements.txt` (fastapi, python-socketio, uvicorn, jinja2, etc.)
 
-1. Create a venv and install requirements:
+Quick start (development)
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+uvicorn main:asgi_app --reload --host 127.0.0.1 --port 8000
 ```
 
-2. Run the server.
+Open the pages in your browser:
+- Player/audience: http://127.0.0.1:8000/
+- Judge controls:   http://127.0.0.1:8000/judge
 
-Option A (easy, no eventlet): run the app directly using the threading async mode. This avoids eventlet and the monkey-patch warning:
+Server API (useful for automation/testing)
+- GET `/api/state` — returns current game state JSON
+- POST `/api/select` — reveal an answer, body { id: number }
+  - When the judge reveals an answer, the server adds that answer's points to `roundScore` and broadcasts the updated state.
+- POST `/api/reset` — reset revealed answers and clear `roundScore` (used for Next Round)
+- POST `/api/active` — set active team, body { team: 1|2 }
+- POST `/api/strike` — increment strikes (up to 3)
+- POST `/api/clear_strikes` — clear strikes to 0
+- POST `/api/award` — award the current `roundScore` to the active team and reset `roundScore`
+- POST `/api/award_steal` — award the current `roundScore` to the non-active team (steal) and reset `roundScore`
 
-```bash
-python app.py
-```
+Frontend notes
+- Shared static assets: `static/app.js` (socket connection + client boot), `static/styles.css`.
+- Templates: `templates/play.html` and `templates/judge.html`. Each page defines `window.renderState(state)` to render state updates, and `static/app.js` calls that hook after receiving `state_update` Socket.IO events.
 
-For production, consider running behind an ASGI server (uvicorn or gunicorn with an async worker) and/or using a message queue (Redis) with Flask-SocketIO's message queue feature to scale across processes. Example production approaches:
+Development tips
+- The app keeps state in-memory (`main.py.game_state`). If you restart the server state will reset.
+- To persist scores across runs, add a small storage backend (file, sqlite) and update the endpoints.
+- For production: run behind a process manager and consider using a message queue (Redis) with python-socketio to scale across processes.
 
-Option B (FastAPI + python-socketio ASGI app):
+License & contribution
+- This is a small personal project. Feel free to open issues/PRs.
 
-Development (auto-reload):
-
-```bash
-uvicorn main:asgi_app --reload --host 0.0.0.0 --port 8000
-```
-
-Production (example with Gunicorn + Uvicorn workers):
-
-```bash
-gunicorn -k uvicorn.workers.UvicornWorker main:asgi_app -w 4
-```
-
-3. Open http://localhost:5000 and http://localhost:5000/judge
