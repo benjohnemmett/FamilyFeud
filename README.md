@@ -44,10 +44,19 @@ Server API (useful for automation/testing)
 - POST `/api/clear_strikes` — clear strikes to 0
 - POST `/api/award` — award the current `roundScore` to the active team and reset `roundScore`
 - POST `/api/award_steal` — award the current `roundScore` to the non-active team (steal) and reset `roundScore`
+- POST `/api/new_question` — load a new question, optional body { question_id: number }
+- GET `/api/questions` — get list of all available questions
 
 Frontend notes
 - Shared static assets: `static/app.js` (socket connection + client boot), `static/styles.css`.
 - Templates: `templates/play.html` and `templates/judge.html`. Each page defines `window.renderState(state)` to render state updates, and `static/app.js` calls that hook after receiving `state_update` Socket.IO events.
+
+Questions and Data
+- Questions and answers are loaded from `questions.json` in the project root
+- The JSON file contains an array of questions, each with an ID, question text, and array of answers with points
+- You can add new questions by editing the JSON file and restarting the server
+- Use the `/api/new_question` endpoint to load different questions during gameplay
+- Use the `/api/questions` endpoint to see all available questions
 
 Development tips
 - The app keeps state in-memory (`main.py.game_state`). If you restart the server state will reset.

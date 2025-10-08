@@ -1,4 +1,6 @@
 import asyncio
+import json
+import os
 from fastapi import FastAPI, Request, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -13,16 +15,51 @@ templates = Jinja2Templates(directory='templates')
 # Serve static files (CSS/JS/assets)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# In-memory game state
+# Load questions from JSON file
+def load_questions():
+    """Load questions from questions.json file"""
+    questions_file = os.path.join(os.path.dirname(__file__), 'questions.json')
+    try:
+        with open(questions_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return data.get('questions', [])
+    except FileNotFoundError:
+        print(f"Warning: questions.json not found at {questions_file}")
+        return []
+    except json.JSONDecodeError as e:
+        print(f"Error parsing questions.json: {e}")
+        return []
+
+def get_current_question():
+    """Get the current question based on game state"""
+    questions = load_questions()
+    if not questions:
+        # Fallback to default question if no questions loaded
+        return {
+            'question': 'Name something you take on vacation',
+            'answers': [
+                {'id': 1, 'text': 'Toothbrush', 'points': 30, 'revealed': False},
+                {'id': 2, 'text': 'Sunscreen', 'points': 25, 'revealed': False},
+                {'id': 3, 'text': 'Passport', 'points': 20, 'revealed': False},
+                {'id': 4, 'text': 'Camera', 'points': 15, 'revealed': False},
+                {'id': 5, 'text': 'Clothes', 'points': 10, 'revealed': False},
+            ]
+        }
+    
+    # For now, use the first question. Later we can add question selection logic
+    current_q = questions[0]
+    return {
+        'question': current_q['question'],
+        'answers': [
+            {**answer, 'revealed': False} for answer in current_q['answers']
+        ]
+    }
+
+# Initialize game state with loaded question
+current_question_data = get_current_question()
 game_state = {
-    'question': 'Name something you take on vacation',
-    'answers': [
-        {'id': 1, 'text': 'Toothbrush', 'points': 30, 'revealed': False},
-        {'id': 2, 'text': 'Sunscreen', 'points': 25, 'revealed': False},
-        {'id': 3, 'text': 'Passport', 'points': 20, 'revealed': False},
-        {'id': 4, 'text': 'Camera', 'points': 15, 'revealed': False},
-        {'id': 5, 'text': 'Clothes', 'points': 10, 'revealed': False},
-    ],
+    'question': current_question_data['question'],
+    'answers': current_question_data['answers'],
     'last_selected': None,
     'strikes': 0,
     'roundScore': 0,
@@ -85,6 +122,55 @@ async def api_reset():
     game_state['roundScore'] = 0
     await broadcast_state()
     return {'ok': True}
+
+
+@app.post('/api/new_question')
+async def api_new_question(payload: dict = None):
+    """Load a new question from the JSON file"""
+    question_id = payload.get('question_id') if payload else None
+    questions = load_questions()
+    
+    if not questions:
+        return JSONResponse({'error': 'No questions available'}, status_code=status.HTTP_404_NOT_FOUND)
+    
+    # If question_id is specified, find that specific question
+    if question_id is not None:
+        selected_question = next((q for q in questions if q['id'] == question_id), None)
+        if not selected_question:
+            return JSONResponse({'error': f'Question with id {question_id} not found'}, status_code=status.HTTP_404_NOT_FOUND)
+    else:
+        # For now, just cycle through questions. Later we can add random selection
+        current_id = getattr(game_state, 'current_question_id', 0)
+        next_id = (current_id % len(questions)) + 1
+        selected_question = next((q for q in questions if q['id'] == next_id), questions[0])
+    
+    # Update game state with new question
+    game_state['question'] = selected_question['question']
+    game_state['answers'] = [
+        {**answer, 'revealed': False} for answer in selected_question['answers']
+    ]
+    game_state['last_selected'] = None
+    game_state['roundScore'] = 0
+    game_state['strikes'] = 0
+    game_state['current_question_id'] = selected_question['id']
+    
+    await broadcast_state()
+    return {'ok': True, 'question_id': selected_question['id']}
+
+
+@app.get('/api/questions')
+async def api_get_questions():
+    """Get list of all available questions"""
+    questions = load_questions()
+    return {
+        'questions': [
+            {
+                'id': q['id'],
+                'question': q['question'],
+                'answer_count': len(q['answers'])
+            } for q in questions
+        ]
+    }
 
 
 @app.post('/api/active')

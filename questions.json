@@ -1,0 +1,59 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "question": "Name something you take on vacay",
+      "answers": [
+        {"id": 1, "text": "Toothbrush", "points": 30},
+        {"id": 2, "text": "Sunscreen", "points": 25},
+        {"id": 3, "text": "Passport", "points": 20},
+        {"id": 4, "text": "Camera", "points": 15},
+        {"id": 5, "text": "Clothes", "points": 10}
+      ]
+    },
+    {
+      "id": 2,
+      "question": "Name a reason people call in sick to work",
+      "answers": [
+        {"id": 1, "text": "Flu/cold", "points": 35},
+        {"id": 2, "text": "Stomach ache", "points": 25},
+        {"id": 3, "text": "Headache", "points": 20},
+        {"id": 4, "text": "Family emergency", "points": 15},
+        {"id": 5, "text": "Mental health day", "points": 5}
+      ]
+    },
+    {
+      "id": 3,
+      "question": "Name something you might find in a teenager's room",
+      "answers": [
+        {"id": 1, "text": "Dirty clothes", "points": 32},
+        {"id": 2, "text": "Phone", "points": 28},
+        {"id": 3, "text": "Gaming console", "points": 20},
+        {"id": 4, "text": "Posters", "points": 15},
+        {"id": 5, "text": "Books", "points": 5}
+      ]
+    },
+    {
+      "id": 4,
+      "question": "Name something people do at a wedding",
+      "answers": [
+        {"id": 1, "text": "Dance", "points": 40},
+        {"id": 2, "text": "Eat cake", "points": 25},
+        {"id": 3, "text": "Take photos", "points": 20},
+        {"id": 4, "text": "Give gifts", "points": 10},
+        {"id": 5, "text": "Cry", "points": 5}
+      ]
+    },
+    {
+      "id": 5,
+      "question": "Name a food that's better when it's hot",
+      "answers": [
+        {"id": 1, "text": "Pizza", "points": 38},
+        {"id": 2, "text": "Coffee", "points": 25},
+        {"id": 3, "text": "Soup", "points": 20},
+        {"id": 4, "text": "Cookies", "points": 12},
+        {"id": 5, "text": "Fries", "points": 5}
+      ]
+    }
+  ]
+}
