@@ -57,12 +57,16 @@ def get_current_question():
 
 # Initialize game state with loaded question
 current_question_data = get_current_question()
+questions = load_questions()
+initial_question_id = questions[0]['id'] if questions else 1
+
 game_state = {
     'question': current_question_data['question'],
     'answers': current_question_data['answers'],
     'last_selected': None,
     'strikes': 0,
     'roundScore': 0,
+    'current_question_id': initial_question_id,
 }
 
 # Team info (displayed on play/judge pages)
@@ -140,7 +144,7 @@ async def api_new_question(payload: dict = None):
             return JSONResponse({'error': f'Question with id {question_id} not found'}, status_code=status.HTTP_404_NOT_FOUND)
     else:
         # For now, just cycle through questions. Later we can add random selection
-        current_id = getattr(game_state, 'current_question_id', 0)
+        current_id = game_state.get('current_question_id', 0)
         next_id = (current_id % len(questions)) + 1
         selected_question = next((q for q in questions if q['id'] == next_id), questions[0])
     
@@ -156,6 +160,47 @@ async def api_new_question(payload: dict = None):
     
     await broadcast_state()
     return {'ok': True, 'question_id': selected_question['id']}
+
+
+@app.post('/api/next_round')
+async def api_next_round():
+    """Start the next round: award current points, load new question, reset round state"""
+    # First, award any current round score to the active team
+    current_round_score = game_state.get('roundScore', 0)
+    if current_round_score > 0:
+        if game_state.get('activeTeam', 1) == 1:
+            game_state['team1Score'] = game_state.get('team1Score', 0) + current_round_score
+        else:
+            game_state['team2Score'] = game_state.get('team2Score', 0) + current_round_score
+    
+    # Load a new question
+    questions = load_questions()
+    if not questions:
+        return JSONResponse({'error': 'No questions available'}, status_code=status.HTTP_404_NOT_FOUND)
+    
+    # Cycle to the next question
+    current_id = game_state.get('current_question_id', 0)
+    next_id = (current_id % len(questions)) + 1
+    selected_question = next((q for q in questions if q['id'] == next_id), questions[0])
+    
+    # Update game state with new question and reset round state
+    game_state['question'] = selected_question['question']
+    game_state['answers'] = [
+        {**answer, 'revealed': False} for answer in selected_question['answers']
+    ]
+    game_state['last_selected'] = None
+    game_state['roundScore'] = 0
+    game_state['strikes'] = 0
+    game_state['current_question_id'] = selected_question['id']
+    
+    await broadcast_state()
+    return {
+        'ok': True, 
+        'question_id': selected_question['id'],
+        'awarded_points': current_round_score,
+        'team1Score': game_state.get('team1Score', 0),
+        'team2Score': game_state.get('team2Score', 0)
+    }
 
 
 @app.get('/api/questions')

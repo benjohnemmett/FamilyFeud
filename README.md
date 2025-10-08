@@ -45,6 +45,7 @@ Server API (useful for automation/testing)
 - POST `/api/award` — award the current `roundScore` to the active team and reset `roundScore`
 - POST `/api/award_steal` — award the current `roundScore` to the non-active team (steal) and reset `roundScore`
 - POST `/api/new_question` — load a new question, optional body { question_id: number }
+- POST `/api/next_round` — start next round: award current points to active team, load new question, reset round state
 - GET `/api/questions` — get list of all available questions
 
 Frontend notes

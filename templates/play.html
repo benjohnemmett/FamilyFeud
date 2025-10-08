@@ -51,11 +51,14 @@
         // page-level render function used by /static/app.js
         window.renderState = function (state) {
                 document.getElementById('questionText').textContent = state.question || '';
-                // update question counter (revealed / total)
+                // update question counter (revealed / total) and question number
                 const revealedCount = (state.answers || []).filter(a => a.revealed).length;
                 const totalCount = (state.answers || []).length;
                 const counterEl = document.getElementById('questionCounter');
-                if (counterEl) counterEl.textContent = `${revealedCount} / ${totalCount}`;
+                if (counterEl) {
+                    const questionId = state.current_question_id || 1;
+                    counterEl.textContent = `Question ${questionId} • ${revealedCount} / ${totalCount} revealed`;
+                }
 
                 // update round score
                 const roundEl = document.getElementById('roundScore');

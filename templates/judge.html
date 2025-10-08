@@ -70,11 +70,14 @@
       // page-level render function used by /static/app.js
       window.renderState = function (state) {
         document.getElementById('question').innerText = state.question || '';
-          // update question counter (revealed / total)
-          const revealedCount = (state.answers || []).filter(a => a.revealed).length;
-          const totalCount = (state.answers || []).length;
-          const counterEl = document.getElementById('questionCounter');
-          if (counterEl) counterEl.textContent = `${revealedCount} / ${totalCount}`;
+        // update question counter (revealed / total) and question number
+        const revealedCount = (state.answers || []).filter(a => a.revealed).length;
+        const totalCount = (state.answers || []).length;
+        const counterEl = document.getElementById('questionCounter');
+        if (counterEl) {
+          const questionId = state.current_question_id || 1;
+          counterEl.textContent = `Question ${questionId} • ${revealedCount} / ${totalCount} revealed`;
+        }
           // update round score
           const roundEl = document.getElementById('roundScore');
           if (roundEl) roundEl.textContent = (state.roundScore ?? 0);
@@ -170,11 +173,16 @@
       if (btnClearStrikesBottom) btnClearStrikesBottom.addEventListener('click', async () => { await fetch('/api/clear_strikes', { method: 'POST' }); });
 
       if (btnNextRound) btnNextRound.addEventListener('click', async () => {
-        // basic next-round behavior: reset revealed answers and clear strikes
-        await fetch('/api/reset', { method: 'POST' });
-        await fetch('/api/clear_strikes', { method: 'POST' });
-        // bump roundScore back to 0 on server if implemented (no-op if endpoint missing)
-        try { await fetch('/api/round_next', { method: 'POST' }); } catch (e) { /* noop */ }
+        // Complete next round: award points, load new question, reset round state
+        try {
+          const res = await fetch('/api/next_round', { method: 'POST' });
+          if (!res.ok) {
+            const error = await res.json();
+            alert(`Next round failed: ${error.error || 'Unknown error'}`);
+          }
+        } catch (e) {
+          alert(`Next round failed: ${e.message}`);
+        }
       });
 
       if (btnAwardPoints) btnAwardPoints.addEventListener('click', async () => {
