@@ -18,7 +18,16 @@ Quick start (development)
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+```
+
+**Option 1: Run with uvicorn directly**
+```bash
 uvicorn main:asgi_app --reload --host 127.0.0.1 --port 8000
+```
+
+**Option 2: Run main.py directly (recommended for development)**
+```bash
+python main.py
 ```
 
 Open the pages in your browser:

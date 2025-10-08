@@ -5,3 +5,4 @@ pytest
 pytest-asyncio
 httpx>=0.24
 pytest
+jinja2
