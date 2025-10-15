@@ -5,11 +5,28 @@
     <title>Family Feud - Judge</title>
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js" integrity="" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="/static/styles.css">
+    <style>
+      /* Judge-specific theme overrides (scoped to body.judge-theme) */
+      body.judge-theme {
+        background: linear-gradient(135deg, #081a3a 0%, #0f2b55 100%);
+        color: #cfcfcf;
+      }
+      body.judge-theme .title { color: #d7e6ff; text-shadow: none; }
+      body.judge-theme .team-box { background: rgba(255,255,255,0.03); border-color: transparent; }
+      body.judge-theme .team-name, body.judge-theme .team-indicator { color: #aab6c8; }
+      body.judge-theme .team-score { color: #e6eefc; }
+      body.judge-theme .question { background: rgba(255,255,255,0.04); }
+      body.judge-theme .question-text { color: #d6e6ff; }
+      body.judge-theme .round-score-box { background: rgba(255,255,255,0.03); }
+      body.judge-theme .answer { background: rgba(255,255,255,0.02); color: #cfcfcf; border-color: rgba(255,255,255,0.04); }
+      /* keep revealed answers bright to preserve readability */
+      body.judge-theme .revealed { background: linear-gradient(90deg,#e6f0ff, #99c2ff); color: #091019; }
+    </style>
   </head>
-  <body>
+  <body class="judge-theme">
   <div class="container">
     <div class="header">
-      <div class="title">Family Feud</div>
+      <div class="title">Family Feud Judge Controls</div>
     </div>
 
     <div class="teams-section">
