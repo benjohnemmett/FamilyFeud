@@ -80,10 +80,8 @@
                     const row = document.createElement('div');
                     row.className = 'answer-row ' + (a.revealed ? 'revealed' : 'hidden-answer');
                     row.innerHTML = `
-                        <div class="answer-number">${idx + 1}</div>
-                        <div class="answer-text">${a.revealed ? a.text.toUpperCase() : '——'}</div>
-                        <div class="answer-points">${a.revealed ? a.points + ' pts' : ''}</div>
-                    `;
+                            <div class="answer-number">${idx + 1}</div>
+                            <div class="answer-text">${a.revealed ? a.text.toUpperCase() + ' - ' + a.points : '——'}</div>                    `;
                     if (idx < half) leftCol.appendChild(row); else rightCol.appendChild(row);
                 });
 
