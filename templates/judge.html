@@ -32,6 +32,44 @@
         -moz-appearance: textfield;
         appearance: textfield;
       }
+      /* Stronger button affordance for judge controls */
+      body.judge-theme .btn-primary {
+        background: #4a90e2; /* lighter blue */
+        color: #fff;
+        transition: transform 150ms ease, background-color 120ms ease, box-shadow 120ms ease;
+      }
+      body.judge-theme .btn-primary:hover {
+        background: #2b6fcc; /* darker blue on hover */
+        transform: scale(1.06);
+        box-shadow: 0 8px 20px rgba(17, 82, 147, 0.35);
+      }
+      body.judge-theme .btn-primary:active {
+        background: #173f7a; /* deep navy on click */
+        transform: scale(0.99);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.25) inset;
+      }
+      /* Apply similar affordance to other button types */
+      body.judge-theme .btn-secondary {
+        background: #35a56a; color: #fff; transition: transform 150ms ease, background-color 120ms ease, box-shadow 120ms ease;
+      }
+      body.judge-theme .btn-secondary:hover { background: #2a8a55; transform: scale(1.06); box-shadow: 0 8px 20px rgba(16,88,56,0.28); }
+      body.judge-theme .btn-secondary:active { background: #1c5536; transform: scale(0.99); box-shadow: 0 4px 8px rgba(0,0,0,0.25) inset; }
+
+      body.judge-theme .btn-warning { background: #f0a82b; color:#111; transition: transform 150ms ease, background-color 120ms ease, box-shadow 120ms ease; }
+      body.judge-theme .btn-warning:hover { background: #d78f18; transform: scale(1.06); box-shadow: 0 8px 20px rgba(119,68,8,0.28); }
+      body.judge-theme .btn-warning:active { background: #b06b12; transform: scale(0.99); box-shadow: 0 4px 8px rgba(0,0,0,0.18) inset; }
+
+      body.judge-theme .btn-danger { background: #ff5c5c; color:#111; transition: transform 150ms ease, background-color 120ms ease, box-shadow 120ms ease; }
+      body.judge-theme .btn-danger:hover { background: #ff3030; transform: scale(1.06); box-shadow: 0 8px 20px rgba(170,40,40,0.32); }
+      body.judge-theme .btn-danger:active { background: #b82424; transform: scale(0.99); box-shadow: 0 4px 8px rgba(0,0,0,0.25) inset; }
+
+      body.judge-theme .btn-team1 { background: #2878d1; color:#fff; transition: transform 150ms ease, background-color 120ms ease; }
+      body.judge-theme .btn-team1:hover { background: #125ab3; transform: scale(1.06); }
+      body.judge-theme .btn-team1:active { background: #0b3d74; transform: scale(0.99); }
+
+      body.judge-theme .btn-team2 { background: #d1327a; color:#fff; transition: transform 150ms ease, background-color 120ms ease; }
+      body.judge-theme .btn-team2:hover { background: #a21f58; transform: scale(1.06); }
+      body.judge-theme .btn-team2:active { background: #64133a; transform: scale(0.99); }
     </style>
   </head>
   <body class="judge-theme">
