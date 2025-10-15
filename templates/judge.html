@@ -21,6 +21,17 @@
       body.judge-theme .answer { background: rgba(255,255,255,0.02); color: #cfcfcf; border-color: rgba(255,255,255,0.04); }
       /* keep revealed answers bright to preserve readability */
       body.judge-theme .revealed { background: linear-gradient(90deg,#e6f0ff, #99c2ff); color: #091019; }
+      /* Hide spin arrows for number inputs (scoped to judge theme) */
+      body.judge-theme input[type=number]::-webkit-outer-spin-button,
+      body.judge-theme input[type=number]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      body.judge-theme input[type=number] {
+        -webkit-appearance: none;
+        -moz-appearance: textfield;
+        appearance: textfield;
+      }
     </style>
   </head>
   <body class="judge-theme">
@@ -34,11 +45,19 @@
         <div class="team-name" id="team1Name">Team 1</div>
         <div class="team-score" id="team1Score">0</div>
         <div class="team-indicator">● PLAYING ●</div>
+        <div class="team-score-control">
+          <input type="number" id="team1ScoreInput" aria-label="Team 1 score" placeholder="0" style="width:90px; margin-top:8px;">
+          <button id="btnSetTeam1Score" class="btn-primary control-btn" style="height:36px; margin-left:8px;">Set Score</button>
+        </div>
       </div>
       <div class="team-box" id="team2Box" role="button" tabindex="0" aria-pressed="false">
         <div class="team-name" id="team2Name">Team 2</div>
         <div class="team-score" id="team2Score">0</div>
         <div class="team-indicator">● PLAYING ●</div>
+        <div class="team-score-control">
+          <input type="number" id="team2ScoreInput" aria-label="Team 2 score" placeholder="0" style="width:90px; margin-top:8px;">
+          <button id="btnSetTeam2Score" class="btn-primary control-btn" style="height:36px; margin-left:8px;">Set Score</button>
+        </div>
       </div>
     </div>
 
@@ -205,6 +224,30 @@
       if (btnAwardPoints) btnAwardPoints.addEventListener('click', async () => {
         const res = await fetch('/api/award', { method: 'POST' });
         if (!res.ok) alert('Award failed');
+      });
+
+      // judge manual score set buttons
+      const btnSetTeam1Score = document.getElementById('btnSetTeam1Score');
+      const btnSetTeam2Score = document.getElementById('btnSetTeam2Score');
+      if (btnSetTeam1Score) btnSetTeam1Score.addEventListener('click', async () => {
+        const val = document.getElementById('team1ScoreInput').value;
+        const score = parseInt(val, 10);
+        if (isNaN(score)) return alert('Enter a valid number for Team 1');
+        const res = await fetch('/api/set_score', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ team: 1, score }) });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          return alert(`Failed to set score: ${err.error || res.statusText}`);
+        }
+      });
+      if (btnSetTeam2Score) btnSetTeam2Score.addEventListener('click', async () => {
+        const val = document.getElementById('team2ScoreInput').value;
+        const score = parseInt(val, 10);
+        if (isNaN(score)) return alert('Enter a valid number for Team 2');
+        const res = await fetch('/api/set_score', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ team: 2, score }) });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          return alert(`Failed to set score: ${err.error || res.statusText}`);
+        }
       });
     </script>
     <script src="/static/app.js"></script>

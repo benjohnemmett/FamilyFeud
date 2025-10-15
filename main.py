@@ -228,6 +228,29 @@ async def api_set_active(payload: dict):
     return {'ok': True, 'active': team}
 
 
+@app.post('/api/set_score')
+async def api_set_score(payload: dict):
+    """Set a team's total score manually from the judge view.
+    Expects JSON {"team": 1|2, "score": int}
+    """
+    team = payload.get('team')
+    score = payload.get('score')
+    if team not in (1, 2):
+        return JSONResponse({'error': 'team must be 1 or 2'}, status_code=status.HTTP_400_BAD_REQUEST)
+    try:
+        score = int(score)
+    except (TypeError, ValueError):
+        return JSONResponse({'error': 'score must be an integer'}, status_code=status.HTTP_400_BAD_REQUEST)
+
+    if team == 1:
+        game_state['team1Score'] = score
+    else:
+        game_state['team2Score'] = score
+
+    await broadcast_state()
+    return {'ok': True, 'team1Score': game_state.get('team1Score', 0), 'team2Score': game_state.get('team2Score', 0)}
+
+
 @app.post('/api/award')
 async def api_award():
     # award roundScore to active team and reset roundScore

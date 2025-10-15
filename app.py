@@ -57,6 +57,27 @@ def api_reset():
     broadcast_state()
     return jsonify({'ok': True})
 
+
+@app.route('/api/set_score', methods=['POST'])
+def api_set_score():
+    data = request.get_json() or {}
+    team = data.get('team')
+    score = data.get('score')
+    if team not in (1, 2):
+        return jsonify({'error': 'team must be 1 or 2'}), 400
+    try:
+        score = int(score)
+    except (TypeError, ValueError):
+        return jsonify({'error': 'score must be an integer'}), 400
+
+    if team == 1:
+        game_state['team1Score'] = score
+    else:
+        game_state['team2Score'] = score
+
+    broadcast_state()
+    return jsonify({'ok': True, 'team1Score': game_state.get('team1Score', 0), 'team2Score': game_state.get('team2Score', 0)})
+
 @socketio.on('connect', namespace='/game')
 def on_connect():
     emit('state_update', game_state)
